@@ -4,7 +4,16 @@
 
 <!-- <img align="center" width="900" height="450" src="./public/CyberGraph-screenshot.jpg"> -->
 
-## [`Live Site`](https://cyber-graph.vercel.app/)
+## Recent Updates
+
+Now it is integrated with Wallet Connect and Unstoppable Login!
+
+Live site : https://cyber-graph-lac.vercel.app/
+Youtube Demo:
+
+Contact me:
+Discord handle: Soptq#9775
+UD Email: aplenty$dot$brier-0i$at$icloud$dot$com
 
 ## About this project
 
@@ -56,6 +65,9 @@ Set the following variables in `.env`
 
 -   `NEXT_PUBLIC_MORALIS_SERVER_URL = `[`Moralis Server URL`](https://docs.moralis.io/moralis-dapp/connect-the-sdk/connect-with-reacts)
 -   `NEXT_PUBLIC_MORALIS_APP_ID = `[`Moralis App ID`](https://docs.moralis.io/moralis-dapp/connect-the-sdk/connect-with-reacts)
+-   `NEXT_PUBLIC_INFURA_ID = `[`Infura ID`](https://infura.io/)
+-   `NEXT_PUBLIC_UDLOGIN_CLIENT_ID = `[`UDLogin Client ID`](https://udlogin.com/developer/register)
+-   `NEXT_PUBLIC_UDLOGIN_REDIRECT_URL = `[`UDLogin Redirect URL`](https://udlogin.com/developer/register)
 
 Then run:
 
