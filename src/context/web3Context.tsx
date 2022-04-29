@@ -2,9 +2,18 @@ import CyberConnect from "@cyberlab/cyberconnect";
 import { ethers } from "ethers";
 import React, { useCallback, useContext, useState } from "react";
 import Web3Modal from "web3modal";
+import * as UAuthWeb3Modal from "./uauthWeb3Modal";
+import UAuthSPA from "@uauth/js";
+import WalletConnectProvider from "@walletconnect/web3-provider";
+
+const uauthOptions = {
+    clientID: process.env.NEXT_PUBLIC_UDLOGIN_CLIENT_ID,
+    redirectUri: process.env.NEXT_PUBLIC_UDLOGIN_REDIRECT_URL,
+    scope: "openid wallet",
+};
 
 interface Web3ContextInterface {
-    connectWallet: () => Promise<void>;
+    connectWallet: (connectTo: string) => Promise<void>;
     address: string;
     ens: string | null;
     cyberConnect: CyberConnect | null;
@@ -35,26 +44,48 @@ export const Web3ContextProvider: React.FC = ({ children }) => {
     }, []);
 
     // connectWallet fuction to use Web3Modal configuration for enabling wallet access
-    const connectWallet = useCallback(async () => {
-        // init Web3Modal
-        const web3Modal = new Web3Modal({
-            network: "mainnet",
-            cacheProvider: true,
-            providerOptions: {},
-        });
+    const connectWallet = useCallback(
+        async (connectTo: string = "") => {
+            // init Web3Modal
+            const web3Modal = new Web3Modal({
+                network: "mainnet",
+                cacheProvider: false,
+                providerOptions: {
+                    "custom-uauth": {
+                        display: UAuthWeb3Modal.display,
+                        connector: UAuthWeb3Modal.connector,
+                        package: UAuthSPA,
+                        options: uauthOptions,
+                    },
+                    walletconnect: {
+                        package: WalletConnectProvider,
+                        options: {
+                            infuraId: process.env.NEXT_PUBLIC_INFURA_ID,
+                        },
+                    },
+                },
+            });
+            UAuthWeb3Modal.registerWeb3Modal(web3Modal);
+            web3Modal.clearCachedProvider();
+            let instance;
+            if (connectTo) {
+                instance = await web3Modal.connectTo(connectTo);
+            } else {
+                instance = await web3Modal.connect();
+            }
+            const provider = new ethers.providers.Web3Provider(instance);
+            const signer = provider.getSigner();
+            // get the address which user used to sign in
+            const address = await signer.getAddress();
+            // get the ens which user address associated with
+            const ens = await getEnsByAddress(provider, address);
 
-        const instance = await web3Modal.connect();
-        const provider = new ethers.providers.Web3Provider(instance);
-        const signer = provider.getSigner();
-        // get the address which user used to sign in
-        const address = await signer.getAddress();
-        // get the ens which user address associated with
-        const ens = await getEnsByAddress(provider, address);
-
-        setAddress(address);
-        setEns(ens);
-        initCyberConnect(provider.provider);
-    }, [initCyberConnect]);
+            setAddress(address);
+            setEns(ens);
+            initCyberConnect(provider.provider);
+        },
+        [initCyberConnect]
+    );
 
     // the function to get users' address from their ens
     async function getAddressByEns(ens: string) {
